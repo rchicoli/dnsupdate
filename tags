@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Verbose	dnsupdate.py	/^Verbose = False$/;"	kind:variable	line:19
+dnsupdate.py	dnsupdate.py	1;"	kind:file	line:1
+doUpdate	dnsupdate.py	/^def doUpdate(Server, KeyFile, Origin, doPTR, myInput):$/;"	kind:function	line:207
+genPTR	dnsupdate.py	/^def genPTR(Address):$/;"	kind:function	line:181
+getArgs	dnsupdate.py	/^def getArgs():$/;"	kind:function	line:22
+getKey	dnsupdate.py	/^def getKey(FileName):$/;"	kind:function	line:169
+isValidName	dnsupdate.py	/^def isValidName(Name):$/;"	kind:function	line:85
+isValidPTR	dnsupdate.py	/^def isValidPTR(ptr):$/;"	kind:function	line:62
+isValidTTL	dnsupdate.py	/^def isValidTTL(TTL):$/;"	kind:function	line:54
+isValidV4Addr	dnsupdate.py	/^def isValidV4Addr(Address):$/;"	kind:function	line:69
+isValidV6Addr	dnsupdate.py	/^def isValidV6Addr(Address):$/;"	kind:function	line:77
+main	dnsupdate.py	/^def main():$/;"	kind:function	line:272
+parseName	dnsupdate.py	/^def parseName(Origin, Name):$/;"	kind:function	line:188
+verifymyInput	dnsupdate.py	/^def verifymyInput(myInput):$/;"	kind:function	line:92

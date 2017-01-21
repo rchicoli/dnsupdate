@@ -1,0 +1,11 @@
+{
+    "key": {
+        "rndc-key": {
+            "algorithm": "hmac-md5",
+            "secret": "63fT/4K3NrA0I9Sxo/v79A=="
+        }
+    },
+    "zones": {
+        "home.local": "rndc-key"
+    }
+}
