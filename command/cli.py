@@ -31,6 +31,7 @@ class Cli(object):
 
     def __init__(self):
         self.parser = argparse.ArgumentParser(usage='%(prog)s [-h] {-s} {-k} {-o} [-x] {add|delete|update} {Name} {TTL} {Type} {Target}', description='Add, Delete, Replace DNS records using DDNS.')
+        self.args = ''
 
         self.config = ''
         self.key = ''
@@ -69,15 +70,20 @@ class Cli(object):
 
         self.parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Print the rcode returned with for each update')
 
-        self.parser.add_argument('cmd', action='store', nargs='+', metavar='add|delete|update', help='{hostname} {TTL} {Type} {Target}.')
+        self.parser.add_argument('cmd', action='store', nargs='+', metavar='add|delete|update', help='{Name} {TTL} {Type} {Target}.')
 
-        args = self.parser.parse_args(namespace=self)
+        self.args = self.parser.parse_args(namespace=self)
 
         cfg = Config()
         if self.config:
             load_config = cfg.parse_json(self.config)
         else:
             load_config = cfg.parse_json('config/config.json')
+
+        # if self.key:
+        #     load_config = cfg.parse_json(self.config)
+        # else:
+        #     load_config = cfg.parse_json('config/config.json')
 
         try:
             if load_config['zones'][self.zone] != load_config['keys'][self.key]:
@@ -88,7 +94,11 @@ class Cli(object):
         except KeyError:
             print 'KeyError: ', [self.key]
 
-        return args
+        # test = args.get_args()
+        # print 'hi', test.zone
+        # self.args.append()
+
+        return self.args, self.key, self.zone
 
     def is_valid_TTL(self, ttl):
         """
