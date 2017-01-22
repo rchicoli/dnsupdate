@@ -2,15 +2,15 @@ from __future__ import absolute_import
 
 import argparse
 
-# import textwrap
 import re
 import socket
+
 import dns.query
 import dns.tsigkeyring
 import dns.update
 import dns.reversename
 import dns.resolver
-from dns.exception import DNSException, SyntaxError
+from dns.exception import SyntaxError
 
 from config import Config
 
@@ -30,12 +30,14 @@ class Cli(object):
     """
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser()
+        self.parser = argparse.ArgumentParser(usage='%(prog)s [-h] {-s} {-k} {-o} [-x] {add|delete|update} {Name} {TTL} {Type} {Target}', description='Add, Delete, Replace DNS records using DDNS.')
+
         self.config = ''
         self.key = ''
         self.zone = ''
         self.verbose = ''
         self.server = ''
+        self.do_ptr = False
 
         self.cmd = {}
 
@@ -44,8 +46,16 @@ class Cli(object):
         self.ptr = ''
         self.ttl = ''
 
+        self.ptr_target = ''
+        self.ptr_zone = ''
+        self.ptr_name = ''
+        self.ptr_update = ''
+
+        self.update = ''
+        self.response = ''
+        self.ptr_response = ''
+
     def get_args(self):
-        # parser = argparse.ArgumentParser(usage='%(prog)s [-h] {-s} {-k} {-o} [-x] {add|delete|update} {Name} {TTL} {Type} {Target}', description='Add, Delete, Replace DNS records using DDNS.')
 
         self.parser.add_argument('-s', '--server', dest='server', required=True, help='DNS server to update (Required)')
 
@@ -55,15 +65,13 @@ class Cli(object):
 
         self.parser.add_argument('-z', '--zone', dest='zone', required=True, help='Specify the origin. Optional, if not provided origin will be determined')
 
-        self.parser.add_argument('-p', '--update-ptr', dest='update-ptr', action='store_true', help='Also modify the PTR for a given A or AAAA record. Forward and reverse zones must be on the same server.')
+        self.parser.add_argument('-p', '--update-ptr', dest='do_ptr', action='store_true', help='Also modify the PTR for a given A or AAAA record. Forward and reverse zones must be on the same server.')
 
         self.parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Print the rcode returned with for each update')
 
         self.parser.add_argument('cmd', action='store', nargs='+', metavar='add|delete|update', help='{hostname} {TTL} {Type} {Target}.')
 
         args = self.parser.parse_args(namespace=self)
-
-        # print args
 
         cfg = Config()
         if self.config:
@@ -84,7 +92,7 @@ class Cli(object):
 
     def is_valid_TTL(self, ttl):
         """
-        validate ttl
+        validate TTL
         """
 
         self.ttl = ttl
@@ -92,13 +100,13 @@ class Cli(object):
         try:
             ttl = dns.ttl.from_text(self.ttl)
         except:
-            print 'TTL:', self.ttl, 'is not valid'
+            print 'Error:', self.ttl, 'is not a valid TTL value'
             exit(-1)
         return self.ttl
 
     def is_valid_PTR(self, ptr):
         """
-        nsupdate PTR
+        validate PTR
             update add 4.0.17.172.in-addr.arpa. 300 PTR test03.home.local.
         """
 
@@ -112,7 +120,7 @@ class Cli(object):
 
     def is_valid_V4_Addr(self, address):
         """
-        validate the address
+        validate IPV4
         """
 
         self.address = address
@@ -132,7 +140,7 @@ class Cli(object):
 
     def is_valid_V6_Add(self, address):
         """
-        validate the address
+        validate IPV6
         """
 
         self.address = address
@@ -147,7 +155,7 @@ class Cli(object):
 
     def is_valid_Name(self, name):
         """
-        validate the host
+        validate hosts
         """
 
         self.name = name
@@ -165,7 +173,7 @@ class Cli(object):
 
         if len(self.cmd) < 5:
             print 'Error: not enough options for an A record'
-            print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL A Target'
+            print 'Usage: dnsupdate -z zone -s server -k key add|delete|update Name TTL A Target'
             exit(-1)
 
         self.cmd = {'action': cmd[0].lower(), 'name': cmd[1], 'ttl': cmd[2], 'type': cmd[3].upper(), 'target': cmd[4]}
@@ -226,114 +234,119 @@ class Cli(object):
 
         return self.cmd
 
-    # def getKey(FileName):
+    # def getKey(self, fileName):
     #     f = open(FileName)
-    #     key = f.readline()
+    #     self.key = f.readline()
     #     f.close()
     #     k = {key.rsplit(' ')[0]:key.rsplit(' ')[6]}
     #     try:
-    #         KeyRing = dns.tsigkeyring.from_text(k)
+    #         self.keyring = dns.tsigkeyring.from_text(k)
     #     except:
     #         print k, 'is not a valid key. The file should be in DNS KEY record format. See dnssec-keygen(8)'
     #         exit()
-    #     return KeyRing
+    #     return self.keyring
 
-    # def genPTR(Address):
-    #     try:
-    #         a = dns.reversename.from_address(Address)
-    #     except:
-    #         print 'Error:', Address, 'is not a valid IP adresss'
-    #     return a
+    def gen_PTR(self, address):
+        """
+        generate PTR
+        """
+
+        self.address = address
+
+        try:
+            a = dns.reversename.from_address(self.address)
+        except:
+            print 'Error:', self.address, 'is not a valid IP adresss'
+        return a
 
     def parse_Name(self, zone, name):
         """
-        parse_name
+        parse hosts
         """
-
-        self.zone = zone
-        self.name = name
 
         try:
             n = dns.name.from_text(self.name)
         except:
             print 'Error:', n, 'is not a valid name'
-            exit()
+            exit(-1)
         if self.zone is None:
             self.zone = dns.resolver.zone_for_name(n)
-            Name = n.relativize(self.zone)
+            self.name = n.relativize(self.zone)
             return self.zone, self.name
         else:
             try:
                 self.zone = dns.name.from_text(self.zone)
             except:
-                print 'Error:', Name, 'is not a valid origin'
-                exit()
-            Name = n - self.zone
+                print 'Error:', self.name, 'is not a valid origin'
+                exit(-1)
+            self.name = n - self.zone
             return self.zone, self.name
 
-    def doUpdate(self, server, key, zone, update_ptr, cmd):
+    def doUpdate(self, server, key, zone, do_ptr, cmd):
 
-        action = self.validate_input(cmd)
+        self.cmd = self.validate_input(cmd)
+        self.server = server
+        self.zone = zone
 
-        # print action
+        # self.key = getKey(key)
+        self.key = key
 
         # Get the hostname and the zone
-        self.zone, self.name = self.parse_Name(self.zone, action['name'])
-        print self.zone, self.name
-
-        # KeyRing = getKey(KeyFile)
+        self.zone, self.name = self.parse_Name(self.zone, self.cmd['name'])
 
         # Start constructing the DDNS Query
-        # update = dns.update.Update(zone, keyring=key)
+        self.update = dns.update.Update(zone, keyring=key)
 
-        # # Put the payload together.
-        # if Type == 'A' or Type == 'AAAA':
-        #     myPayload = myInput[4]
-        #     if ptr is True:
-        #         ptrTarget = name.to_text() + '.' + zone.to_text()
-        #         ptrOrigin, ptrName = parseName(None, genPTR(myPayload).to_text())
-        #         ptrUpdate = dns.update.Update(ptrOrigin, keyring=KeyRing)
-        # if Type == 'CNAME' or Type == 'NS' or Type == 'TXT' or Type == 'PTR':
-        #     myPayload = myInput[4]
-        #     do_PTR = False
+        # Put the payload together.
+        if self.cmd['type'] == 'A' or self.cmd['type'] == 'AAAA':
+            payload = self.cmd['address']
+            if self.do_ptr is True:
+                self.ptr_target = self.name.to_text() + '.' + self.zone.to_text()
+                self.ptr_zone, ptr_name = self.parse_Name(None, self.gen_PTR(payload).to_text())
+                self.ptr_update = dns.update.Update(self.ptr_zone, keyring=self.key)
+
+        if self.cmd['type'] == 'CNAME' or self.cmd['type'] == 'NS' or self.cmd['type'] == 'TXT' or self.cmd['type'] == 'PTR':
+            payload = self.cmd['target']
+            self.do_ptr = False
+
         # elif Type == 'SRV':
-        #     myPayload = myInput[4]+' '+myInput[5]+' '+myInput[6]+' '+myInput[7]
-        #     do_PTR = False
+        #     payload = self.cmd['target']+' '+self.cmd[5]+' '+self.cmd[6]+' '+self.cmd[7]
+        #     self.do_ptr = False
         # elif Type == 'MX':
-        #     myPayload = myInput[4]+' '+myInput[5]
-        #     do_PTR = False
+        #     payload = myInput[4]+' '+myInput[5]
+        #     self.do_ptr = False
 
-        # # Build the update
-        # if Action == 'add':
-        #     update.add(name, TTL, Type, myPayload)
-        #     if ptr is True:
-        #         ptrUpdate.add(ptrName, TTL, 'PTR', ptrTarget)
+        # Build the update
+        if self.cmd['action'] == 'add':
+            self.update.add(self.cmd['name'], self.cmd['ttl'], self.cmd['type'], payload)
+            if self.do_ptr is True:
+                self.ptr_update.add(self.ptr_name, self.cmd['ttl'], 'PTR', self.ptr_target)
 
-        # elif Action == 'delete' or Action == 'del':
-        #     update.delete(name, Type, myPayload)
-        #     if ptr is True:
-        #         ptrUpdate.delete(ptrName, 'PTR', ptrTarget)
+        elif self.cmd['action'] == 'delete' or self.cmd['action'] == 'del':
+            self.update.delete(self.name, self.cmd['type'], payload)
+            if self.do_ptr is True:
+                self.ptr_update.delete(self.ptr_name, 'PTR', self.ptr_target)
 
-        # elif Action == 'update':
-        #     update.replace(Name, TTL, Type, myPayload)
-        #     if ptr is True:
-        #         ptrUpdate.replace(ptrName, TTL, 'PTR', ptrTarget)
+        elif self.cmd['action'] == 'update':
+            self.update.replace(self.name, self.cmd['ttl'], self.cmd['type'], payload)
+            if self.do_ptr is True:
+                self.ptr_update.replace(self.ptr_name, self.cmd['ttl'], 'PTR', self.ptr_target)
 
-        # # Do the update
-        # try:
-        #     Response = dns.query.tcp(update, server)
-        # except dns.tsig.PeerBadKey:
-        #     print 'ERROR: The server is refusing our key'
-        #     exit()
+        # Do the update
+        try:
+            self.response = dns.query.tcp(self.update, self.server)
+        except dns.tsig.PeerBadKey:
+            print 'ERROR: The server is refusing our key'
+            exit(-1)
 
-        # if Verbose == True:
-        #     print 'Creating', Type, 'record for', Name, 'resulted in:', dns.rcode.to_text(Response.rcode())
+        if self.verbose is True:
+            print 'Creating', self.cmd['type'], 'record for', self.cmd['name'], 'resulted in:', dns.rcode.to_text(self.response.rcode())
 
-        # if doPTR == True:
-        #     try:
-        #         ptrResponse = dns.query.tcp(ptrUpdate, Server)
-        #     except dns.tsig.PeerBadKey:
-        #         print 'ERROR: The server is refusing our key'
-        #         exit()
-        #     if Verbose == True:
-        #         print 'Creating PTR record for', Name, 'resulted in:', dns.rcode.to_text(Response.rcode())
+        if self.do_ptr is True:
+            try:
+                self.ptr_response = dns.query.tcp(self.ptr_update, self.server)
+            except dns.tsig.PeerBadKey:
+                print 'ERROR: The server is refusing our key'
+                exit(-1)
+            if self.verbose is True:
+                print 'Creating PTR record for', self.cmd['name'], 'resulted in:', dns.rcode.to_text(self.response.rcode())
