@@ -1,11 +1,16 @@
 {
-    "key": {
+    "keys": {
         "rndc-key": {
             "algorithm": "hmac-md5",
             "secret": "63fT/4K3NrA0I9Sxo/v79A=="
+        },
+        "test-key": {
+            "algorithm": "hmac-md5",
+            "secret": "12fT/4K3NrA0I9Sxo/v79A=="
         }
     },
     "zones": {
-        "home.local": "rndc-key"
+        "home.local": "rndc-kaey",
+        "example.com": "test-key"
     }
 }
