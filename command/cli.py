@@ -41,6 +41,8 @@ class Cli(object):
 
         self.address = ''
         self.name = ''
+        self.ptr = ''
+        self.ttl = ''
 
     def get_args(self):
         # parser = argparse.ArgumentParser(usage='%(prog)s [-h] {-s} {-k} {-o} [-x] {add|delete|update} {Name} {TTL} {Type} {Target}', description='Add, Delete, Replace DNS records using DDNS.')
@@ -53,7 +55,7 @@ class Cli(object):
 
         self.parser.add_argument('-z', '--zone', dest='zone', required=True, help='Specify the origin. Optional, if not provided origin will be determined')
 
-        self.parser.add_argument('-p', '--ptr', dest='ptr', action='store_true', help='Also modify the PTR for a given A or AAAA record. Forward and reverse zones must be on the same server.')
+        self.parser.add_argument('-p', '--update-ptr', dest='update-ptr', action='store_true', help='Also modify the PTR for a given A or AAAA record. Forward and reverse zones must be on the same server.')
 
         self.parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Print the rcode returned with for each update')
 
@@ -71,6 +73,7 @@ class Cli(object):
 
         try:
             if load_config['zones'][self.zone] != load_config['keys'][self.key]:
+                # TODO: fix this
                 print 'key does not match the one'
                 # print load_config['zones'][self.zone]
                 # print load_config['keys']
@@ -80,7 +83,12 @@ class Cli(object):
         return args
 
     def is_valid_TTL(self, ttl):
+        """
+        validate ttl
+        """
+
         self.ttl = ttl
+
         try:
             ttl = dns.ttl.from_text(self.ttl)
         except:
@@ -88,12 +96,19 @@ class Cli(object):
             exit(-1)
         return self.ttl
 
-    # def isValidPTR(ptr):
-    #     if re.match(r'\b(?:\d{1,3}\.){3}\d{1,3}.in-addr.arpa\b', ptr):
-    #         return True
-    #     else:
-    #         print 'Error:', ptr, 'is not a valid PTR record'
-    #         exit()
+    def is_valid_PTR(self, ptr):
+        """
+        nsupdate PTR
+            update add 4.0.17.172.in-addr.arpa. 300 PTR test03.home.local.
+        """
+
+        self.ptr = ptr
+
+        if re.match(r'^((?:\d{1,3}\.){3}\d{1,3}\.in-addr\.arpa)$', self.ptr):
+            return True
+        else:
+            print 'Error:', self.ptr, 'is not a valid PTR record'
+            exit(-1)
 
     def is_valid_V4_Addr(self, address):
         """
@@ -150,73 +165,65 @@ class Cli(object):
 
         if len(self.cmd) < 5:
             print 'Error: not enough options for an A record'
-            print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL A Address'
+            print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL A Target'
             exit(-1)
 
-        self.cmd = {'action': cmd[0].lower(), 'hostname': cmd[1], 'ttl': cmd[2], 'type': cmd[3].upper(), 'address': cmd[4]}
-
+        self.cmd = {'action': cmd[0].lower(), 'name': cmd[1], 'ttl': cmd[2], 'type': cmd[3].upper(), 'target': cmd[4]}
 
         if self.cmd['action'] != 'add' and self.cmd['action'] != 'delete' and self.cmd['action'] != 'del' and self.cmd['action'] != 'update':
             print 'Error: Invalid action'
-            print 'Usage: dnsupdate -s server -k key [add|delete|update] [Name] [Type] [TTL] [Address]'
+            print 'Usage: dnsupdate -s server -k key [add|delete|update] [Name] [Type] [TTL] [Target]'
             exit(-1)
 
-        self.is_valid_TTL(self.cmd['ttl'])
-
-        self.is_valid_Name(self.cmd['hostname'])
+        if self.cmd['action'] == 'add' or self.cmd['action'] == 'update':
+            self.is_valid_TTL(self.cmd['ttl'])
 
         if self.cmd['type'] == 'A':
-            self.is_valid_V4_Addr(self.cmd['address'])
+            self.is_valid_V4_Addr(self.cmd['target'])
+
         elif self.cmd['type'] == 'AAAA':
-            self.is_valid_V6_Add(self.cmd['address'])
+            self.is_valid_V6_Add(self.cmd['target'])
 
-    #     if type == 'CNAME' or type == 'NS':
-    #         if len(cmd) < 4:
-    #             print 'Error: not enough options for a CNAME record'
-    #             print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL CNAME Target'
-    #             exit()
-    #         isValidName(cmd[1])
-    #         isValidName(cmd[4])
+        elif self.cmd['type'] == 'CNAME':
+            self.is_valid_Name(self.cmd['name'])
+            self.is_valid_Name(self.cmd['target'])
 
-    #     if type == 'PTR':
-    #         if len(cmd) < 4:
-    #             print 'Error: not enough options for a PTR record'
-    #             print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL PTR Target'
-    #             exit()
-    # #        isValidPTR(cmd[1])
-    #         isValidName(cmd[4])
+        elif self.cmd['type'] == 'PTR':
+            self.is_valid_PTR(self.cmd['name'])
+            self.is_valid_Name(self.cmd['target'])
 
-    #     if type == 'TXT':
-    #         # Wrap the TXT string in quotes since the quotes get stripped
-    #         cmd[4] = '"%s"' % cmd[4]
+        # elif self.cmd['type'] == 'TXT':
+        #     # Wrap the TXT string in quotes since the quotes get stripped
+        #     self.cmd['target'] = '"%s"' % self.cmd['target']
 
-    #     if type == 'MX':
-    #         if len(cmd) < 4:
-    #             print 'Error: not enough options for an MX record'
-    #             print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL MX Weight Target'
-    #         if int(cmd[4]) > 65535 or int(cmd[4]) < 0:
-    #             print 'Error: Preference must be between 0 - 65535'
-    #             exit()
-    #         isValidName(cmd[1])
-    #         isValidName(cmd[5])
+        # elif self.cmd['type'] == 'MX':
+        #     if len(cmd) < 4:
+        #         print 'Error: not enough options for an MX record'
+        #         print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL MX Weight Target'
+        #     if int(cmd[4]) > 65535 or int(cmd[4]) < 0:
+        #         print 'Error: Preference must be between 0 - 65535'
+        #         exit()
+        #     self.is_valid_Name(self.cmd['name'])(self.cmd['name'])
+        #     self.is_valid_Name(self.cmd['name'])(self.cmd['address'])
 
-    #     if type == 'SRV':
-    #         if len(cmd) < 7:
-    #             print 'Error: not enough options for a SRV record'
-    #             print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL SRV Priority Weight Port Target'
-    #         if int(cmd[4]) > 65535 or int(cmd[4]) < 0:
-    #             print 'Error: Priority must be between 0 - 65535'
-    #             exit()
-    #         if int(cmd[5]) > 65535 or int(cmd[5]) < 0:
-    #             print 'Error: Weight must be between 0 - 65535'
-    #             exit()
-    #         if int(cmd[6]) > 65535 or int(cmd[6]) < 0:
-    #             print 'Error: Port must be between 0 - 65535'
-    #             exit()
-    #         isValidName(cmd[1])
-    #         isValidName(cmd[7])
+        # elif self.cmd['type'] == 'SRV':
+        #     if len(cmd) < 7:
+        #         print 'Error: not enough options for a SRV record'
+        #         print 'Usage: dnsupdate -o origin -s server -k key add|delete|update Name TTL SRV Priority Weight Port Target'
+        #     if int(cmd[4]) > 65535 or int(cmd[4]) < 0:
+        #         print 'Error: Priority must be between 0 - 65535'
+        #         exit()
+        #     if int(cmd[5]) > 65535 or int(cmd[5]) < 0:
+        #         print 'Error: Weight must be between 0 - 65535'
+        #         exit()
+        #     if int(cmd[6]) > 65535 or int(cmd[6]) < 0:
+        #         print 'Error: Port must be between 0 - 65535'
+        #         exit()
+        #     self.is_valid_Name(self.cmd['name'])(self.cmd['name'])
+        #     self.is_valid_Name(self.cmd['name'])(self.cmd['target'])
 
-        # return action, ttl, type
+        # elif self.cmd['type'] == 'NS':
+
         return self.cmd
 
     # def getKey(FileName):
@@ -238,34 +245,41 @@ class Cli(object):
     #         print 'Error:', Address, 'is not a valid IP adresss'
     #     return a
 
-    # def parseName(Origin, Name):
-    #     try:
-    #         n = dns.name.from_text(Name)
-    #     except:
-    #         print 'Error:', n, 'is not a valid name'
-    #         exit()
-    #     if Origin is None:
-    #         Origin = dns.resolver.zone_for_name(n)
-    #         Name = n.relativize(Origin)
-    #         return Origin, Name
-    #     else:
-    #         try:
-    #             Origin = dns.name.from_text(Origin)
-    #         except:
-    #             print 'Error:', Name, 'is not a valid origin'
-    #             exit()
-    #         Name = n - Origin
-    #         return Origin, Name
+    def parse_Name(self, zone, name):
+        """
+        parse_name
+        """
 
-    def doUpdate(self, server, key, zone, ptr, cmd):
+        self.zone = zone
+        self.name = name
 
-        # action, ttl, type_entry = self.validate_input(cmd)
+        try:
+            n = dns.name.from_text(self.name)
+        except:
+            print 'Error:', n, 'is not a valid name'
+            exit()
+        if self.zone is None:
+            self.zone = dns.resolver.zone_for_name(n)
+            Name = n.relativize(self.zone)
+            return self.zone, self.name
+        else:
+            try:
+                self.zone = dns.name.from_text(self.zone)
+            except:
+                print 'Error:', Name, 'is not a valid origin'
+                exit()
+            Name = n - self.zone
+            return self.zone, self.name
+
+    def doUpdate(self, server, key, zone, update_ptr, cmd):
+
         action = self.validate_input(cmd)
 
-        print action
+        # print action
 
         # Get the hostname and the zone
-        # zone, name = parseName(Origin, myInput[1])
+        self.zone, self.name = self.parse_Name(self.zone, action['name'])
+        print self.zone, self.name
 
         # KeyRing = getKey(KeyFile)
 
