@@ -11,4 +11,4 @@ if __name__ == '__main__':
 
     # print args
 
-    cli.do_update(args.server, args.key, args.zone, args.with_ptr, args.cmd)
+    cli.do_update(args.server, args.zone, args.key, args.do_ptr, args.cmd)
