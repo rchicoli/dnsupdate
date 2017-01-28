@@ -10,7 +10,8 @@
         }
     },
     "zones": {
-        "home.local": "rndc-kaey",
+        "home.local": "rndc-home",
+        "localhost": "rndc-key",
         "example.com": "test-key"
     }
 }

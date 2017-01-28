@@ -78,31 +78,24 @@ class Cli(object):
 
         self.args = self.parser.parse_args(namespace=self)
 
-        # cfg = Config()
-        # if self.config:
-        #     load_config = cfg.parse_json(self.config)
-        # else:
-        #     load_config = cfg.parse_json('config/config.json')
+        cfg = Config()
+        if self.args.config is not None:
+            self.config = cfg.parse_json(self.config)
 
-        # if self.key:
-        #     load_config = cfg.parse_json(self.config)
-        # else:
-        #     load_config = cfg.parse_json('config/config.json')
+            try:
+                if self.config['zones'][self.zone] is not None:
+                    self.key_name = self.config['zones'][self.zone]
 
-        # try:
-        #     if load_config['zones'][self.zone] != load_config['keys'][self.key]:
-        #         # Todo: fix this
-        #         print 'key does not match the one'
-        #         # print load_config['zones'][self.zone]
-        #         # print load_config['keys']
-        # except KeyError:
-        #     print 'KeyError: ', [self.key]
+                    self.my_config = self.config['keys'][self.key_name]
+                    self.my_config.update({'name': self.key_name})
+                    print self.my_config
 
-        # test = args.get_args()
-        # print 'hi', test.zone
-        # self.args.append()
+            except KeyError:
+                print 'KeyError: ', [self.key_name]
+        else:
+            self.my_config = None
 
-        return self.args
+        return self.args, self.my_config
 
     def _is_valid_ttl(self, ttl):
         """
@@ -340,7 +333,7 @@ class Cli(object):
             return self.zone, self.name
 
     # def do_update(self, server, keyring=None, keyname=None, keyalgorithm, zone, do_ptr, cmd):
-    def do_update(self, server, zone, key_file, key_name, key_algorithm, key_secret, do_ptr, cmd):
+    def do_update(self, server, zone, key_file, key_name, key_algorithm, key_secret, do_ptr, cmd, config):
         """Updates
 
         """
@@ -355,8 +348,10 @@ class Cli(object):
             self.key, self.key_algorithm = self.get_key(key_file=key_file)
         elif key_name and key_algorithm and key_secret is not None:
             self.key, self.key_algorithm = self.get_key(key_name=key_name, key_algorithm=key_algorithm, key_secret=key_secret)
+        elif config['name'] and config['secret'] and config['algorithm'] is not None:
+            self.key, self.key_algorithm = self.get_key(key_name=config['name'], key_algorithm=config['algorithm'], key_secret=config['secret'])
         else:
-            print 'Error'
+            print 'Error: missing dns key'
             exit(-1)
 
         # Get the hostname and the zone
