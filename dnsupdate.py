@@ -7,7 +7,7 @@ from command.cli import Cli
 if __name__ == '__main__':
 
     cli = Cli()
-    args, config = cli.get_args()
+    args = cli.get_args()
 
     # print args
 
@@ -20,5 +20,5 @@ if __name__ == '__main__':
         key_secret=args.key_secret,
         do_ptr=args.do_ptr,
         cmd=args.cmd,
-        config=config
+        config=args.config
     )
