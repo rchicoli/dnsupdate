@@ -10,7 +10,7 @@
         }
     },
     "zones": {
-        "home.local": "rndc-home",
+        "home.local": "rndc-key",
         "localhost": "rndc-key",
         "example.com": "test-key"
     }

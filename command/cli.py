@@ -279,10 +279,6 @@ class Cli(object):
         return [keyring, self.algorithm]
 
     def _gen_ptr(self, address):
-        """
-        generate PTR
-        """
-
         self.address = address
 
         try:
@@ -292,20 +288,15 @@ class Cli(object):
         return a
 
     def _parse_name(self, zone, name):
-        """
-        parse hosts
-        """
-
         try:
             n = dns.name.from_text(name)
         except:
             print 'Error:', n, 'is not a valid name'
             exit(-1)
 
-        if self.zone is None:
+        if zone is None:
             self.zone = dns.resolver.zone_for_name(n)
             self.name = n.relativize(self.zone)
-            return self.zone, self.name
         else:
             try:
                 self.zone = dns.name.from_text(zone)
@@ -313,7 +304,7 @@ class Cli(object):
                 print 'Error:', self.name, 'is not a valid origin'
                 exit(-1)
             self.name = n - self.zone
-            return self.zone, self.name
+        return self.zone, self.name
 
     def _validate_config(self, config):
         cfg = Config()
@@ -363,38 +354,35 @@ class Cli(object):
         # Start constructing the DDNS Query
         self.update = dns.update.Update(zone, keyring=self.key, keyalgorithm=getattr(dns.tsig, self.key_algorithm))
 
-        # Put the payload together.
         if self.cmd['type'] == 'A' or self.cmd['type'] == 'AAAA':
-            payload = self.cmd['target']
             if self.do_ptr is True:
                 self.ptr_target = self.name.to_text() + '.' + self.zone.to_text()
-                self.ptr_zone, self.ptr_name = self._parse_name(None, self._gen_ptr(payload).to_text())
-                self.ptr_update = dns.update.Update(self.ptr_zone, keyring=self.key)
+                self.ptr_zone, self.ptr_name = self._parse_name(None, self._gen_ptr(self.cmd['target']).to_text())
+                self.ptr_update = dns.update.Update(self.ptr_zone, keyring=self.key, keyalgorithm=getattr(dns.tsig, self.key_algorithm))
 
         if self.cmd['type'] == 'CNAME' or self.cmd['type'] == 'NS' or self.cmd['type'] == 'TXT' or self.cmd['type'] == 'PTR':
-            payload = self.cmd['target']
             self.do_ptr = False
 
         # elif Type == 'SRV':
         #     payload = self.cmd['target']+' '+self.cmd[5]+' '+self.cmd[6]+' '+self.cmd[7]
         #     self.do_ptr = False
         # elif Type == 'MX':
-        #     payload = myInput[4]+' '+myInput[5]
+        #     payload = self.cmd[4]+' '+self.cmd[5]
         #     self.do_ptr = False
 
         # Build the update
         if self.cmd['action'] == 'add':
-            self.update.add(self.cmd['name'], self.cmd['ttl'], self.cmd['type'], payload)
+            self.update.add(self.cmd['name'], self.cmd['ttl'], self.cmd['type'], self.cmd['target'])
             if self.do_ptr is True:
                 self.ptr_update.add(self.ptr_name, self.cmd['ttl'], 'PTR', self.ptr_target)
 
         elif self.cmd['action'] == 'delete' or self.cmd['action'] == 'del':
-            self.update.delete(self.name, self.cmd['type'], payload)
+            self.update.delete(self.cmd['name'], self.cmd['type'], self.cmd['target'])
             if self.do_ptr is True:
                 self.ptr_update.delete(self.ptr_name, 'PTR', self.ptr_target)
 
         elif self.cmd['action'] == 'update':
-            self.update.replace(self.name, self.cmd['ttl'], self.cmd['type'], payload)
+            self.update.replace(self.cmd['name'], self.cmd['ttl'], self.cmd['type'], self.cmd['target'])
             if self.do_ptr is True:
                 self.ptr_update.replace(self.ptr_name, self.cmd['ttl'], 'PTR', self.ptr_target)
 
