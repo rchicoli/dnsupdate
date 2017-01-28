@@ -66,9 +66,10 @@ class Cli(object):
 
         self.parser.add_argument('-s', '--server', dest='server', required=True, help='DNS server to update (Required)')
         self.parser.add_argument('-c', '--config', dest='config', required=False, help='Config file JSON format (Required)')
-        self.parser.add_argument('--key', dest='key', required=False, help='TSIG key. The TSIG key file should be in DNS KEY record format. (Required)')
-        # self.parser.add_argument('--keyname', dest='keyname', required=False, help='The name of the TSIG key to use (Required)')
-        # self.parser.add_argument('--keyalgorithm', dest='keyalgorithm', required=False, help='The TSIG algorithm to use; defaults to dns.tsig.default_algorithm.')
+        self.parser.add_argument('--key-file', dest='key_file', required=False, help='TSIG key. The TSIG key file should be in DNS KEY record format. (Required)')
+        self.parser.add_argument('--key-name', dest='key_name', required=False, help='The name of the TSIG key to use (Required)')
+        self.parser.add_argument('--key-algorithm', dest='key_algorithm', required=False, help='The TSIG algorithm to use; defaults to dns.tsig.default_algorithm.')
+        self.parser.add_argument('--key-secret', dest='key_secret', required=False, help='The TSIG algorithm to use; defaults to dns.tsig.default_algorithm.')
         self.parser.add_argument('-z', '--zone', dest='zone', required=True, help='Specify the origin. Optional, if not provided origin will be determined')
         self.parser.add_argument('-x', '--with-ptr', dest='do_ptr', action='store_true', help='Also modify the PTR for a given A or AAAA record. Forward and reverse zones must be on the same server.')
         self.parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Print the rcode returned with for each update')
@@ -90,7 +91,7 @@ class Cli(object):
 
         # try:
         #     if load_config['zones'][self.zone] != load_config['keys'][self.key]:
-        #         # TODO: fix this
+        #         # Todo: fix this
         #         print 'key does not match the one'
         #         # print load_config['zones'][self.zone]
         #         # print load_config['keys']
@@ -274,19 +275,24 @@ class Cli(object):
 
         return self.cmd
 
-    def get_key(self, filename, keyname=None, algorithm=None, secret=None):
+    def get_key(self, key_file=None, key_name=None, key_algorithm=None, key_secret=None):
         """generate key
 
         """
 
-        if filename is not None:
-            f = open(filename)
+        if key_file is not None:
+            f = open(key_file)
             self.keyfile = f.read().splitlines()
             f.close()
 
             self.keyname = self.keyfile[0].strip().rsplit(' ')[1].replace('"', '')
             self.algorithm = self.keyfile[1].strip().rsplit(' ')[1].replace(';', '').replace('-', '_').upper()
             self.secret = self.keyfile[2].strip().rsplit(' ')[1].replace('}', '').replace(';', '').replace('"', '')
+
+        elif key_name and key_algorithm and key_secret is not None:
+            self.keyname = key_name
+            self.algorithm = key_algorithm.replace('-', '_').upper()
+            self.secret = key_secret
 
         k = {self.keyname: self.secret}
         try:
@@ -334,7 +340,7 @@ class Cli(object):
             return self.zone, self.name
 
     # def do_update(self, server, keyring=None, keyname=None, keyalgorithm, zone, do_ptr, cmd):
-    def do_update(self, server, zone, key, do_ptr, cmd):
+    def do_update(self, server, zone, key_file, key_name, key_algorithm, key_secret, do_ptr, cmd):
         """Updates
 
         """
@@ -345,7 +351,13 @@ class Cli(object):
         self.zone = zone
         self.do_ptr = do_ptr
 
-        self.key, self.key_algorithm = self.get_key(key)
+        if key_file is not None:
+            self.key, self.key_algorithm = self.get_key(key_file=key_file)
+        elif key_name and key_algorithm and key_secret is not None:
+            self.key, self.key_algorithm = self.get_key(key_name=key_name, key_algorithm=key_algorithm, key_secret=key_secret)
+        else:
+            print 'Error'
+            exit(-1)
 
         # Get the hostname and the zone
         self.zone, self.name = self._parse_name(self.zone, self.cmd['name'])
