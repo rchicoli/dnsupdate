@@ -274,21 +274,27 @@ class Cli(object):
 
         return self.cmd
 
-    def getKey(self, fileName):
-        f = open(fileName)
-        self.keyfile = f.read().splitlines()
-        f.close()
+    def get_key(self, filename, keyname=None, algorithm=None, secret=None):
+        """generate key
 
-        hostname = self.keyfile[0].strip().rsplit(' ')[1].replace('"', '')
-        algo = self.keyfile[1].strip().rsplit(' ')[1].replace(';', '').replace('-', '_').upper()
-        key = self.keyfile[2].strip().rsplit(' ')[1].replace('}', '').replace(';', '').replace('"', '')
-        k = {hostname:key}
+        """
+
+        if filename is not None:
+            f = open(filename)
+            self.keyfile = f.read().splitlines()
+            f.close()
+
+            self.keyname = self.keyfile[0].strip().rsplit(' ')[1].replace('"', '')
+            self.algorithm = self.keyfile[1].strip().rsplit(' ')[1].replace(';', '').replace('-', '_').upper()
+            self.secret = self.keyfile[2].strip().rsplit(' ')[1].replace('}', '').replace(';', '').replace('"', '')
+
+        k = {self.keyname: self.secret}
         try:
-            KeyRing = dns.tsigkeyring.from_text(k)
+            keyring = dns.tsigkeyring.from_text(k)
         except:
             print k, 'is not a valid key. The file should be in DNS KEY record format. See dnssec-keygen(8)'
             exit()
-        return [KeyRing, algo]
+        return [keyring, self.algorithm]
 
     def _gen_ptr(self, address):
         """
@@ -339,7 +345,7 @@ class Cli(object):
         self.zone = zone
         self.do_ptr = do_ptr
 
-        self.key, self.key_algorithm = self.getKey(key)
+        self.key, self.key_algorithm = self.get_key(key)
 
         # Get the hostname and the zone
         self.zone, self.name = self._parse_name(self.zone, self.cmd['name'])

@@ -2244,6 +2244,7 @@ _from_iterable	venv/local/lib/python2.7/_abcoll.py	/^    def _from_iterable(self
 _from_iterable	venv/local/lib/python2.7/_abcoll.py	/^    def _from_iterable(self, it):$/;"	kind:member	line:461
 _g	venv/lib/python2.7/types.py	/^def _g():$/;"	kind:function	line:47
 _g	venv/local/lib/python2.7/types.py	/^def _g():$/;"	kind:function	line:47
+_gen_ptr	command/cli.py	/^    def _gen_ptr(self, address):$/;"	kind:member	line:293
 _get_exports_list	venv/lib/python2.7/os.py	/^def _get_exports_list(module):$/;"	kind:function	line:35
 _get_exports_list	venv/local/lib/python2.7/os.py	/^def _get_exports_list(module):$/;"	kind:function	line:35
 _getaction	venv/lib/python2.7/warnings.py	/^def _getaction(action):$/;"	kind:function	line:160
@@ -2274,6 +2275,11 @@ _is_pypy	venv/lib/python2.7/site.py	/^_is_pypy = hasattr(sys, 'pypy_version_info
 _is_pypy	venv/local/lib/python2.7/site.py	/^_is_pypy = hasattr(sys, 'pypy_version_info')$/;"	kind:variable	line:87
 _is_text_encoding	venv/lib/python2.7/codecs.py	/^    _is_text_encoding = True # Assume codecs are text encodings by default$/;"	kind:variable	line:90
 _is_text_encoding	venv/local/lib/python2.7/codecs.py	/^    _is_text_encoding = True # Assume codecs are text encodings by default$/;"	kind:variable	line:90
+_is_valid_ipv4_addr	command/cli.py	/^    def _is_valid_ipv4_addr(self, address):$/;"	kind:member	line:133
+_is_valid_ipv6_addr	command/cli.py	/^    def _is_valid_ipv6_addr(self, address):$/;"	kind:member	line:153
+_is_valid_name	command/cli.py	/^    def _is_valid_name(self, name):$/;"	kind:member	line:168
+_is_valid_ptr	command/cli.py	/^    def _is_valid_ptr(self, ptr):$/;"	kind:member	line:120
+_is_valid_ttl	command/cli.py	/^    def _is_valid_ttl(self, ttl):$/;"	kind:member	line:106
 _joinrealpath	venv/lib/python2.7/posixpath.py	/^def _joinrealpath(path, rest, seen):$/;"	kind:function	line:380
 _joinrealpath	venv/local/lib/python2.7/posixpath.py	/^def _joinrealpath(path, rest, seen):$/;"	kind:function	line:380
 _locale	venv/lib/python2.7/re.py	/^    _locale = None$/;"	kind:variable	line:110
@@ -2300,6 +2306,7 @@ _parse	venv/lib/python2.7/sre_parse.py	/^def _parse(source, state):$/;"	kind:fun
 _parse	venv/local/lib/python2.7/sre_parse.py	/^def _parse(source, state):$/;"	kind:function	line:395
 _parse_localename	venv/lib/python2.7/locale.py	/^def _parse_localename(localename):$/;"	kind:function	line:449
 _parse_localename	venv/local/lib/python2.7/locale.py	/^def _parse_localename(localename):$/;"	kind:function	line:449
+_parse_name	command/cli.py	/^    def _parse_name(self, zone, name):$/;"	kind:member	line:306
 _parse_sub	venv/lib/python2.7/sre_parse.py	/^def _parse_sub(source, state, nested=1):$/;"	kind:function	line:317
 _parse_sub	venv/local/lib/python2.7/sre_parse.py	/^def _parse_sub(source, state, nested=1):$/;"	kind:function	line:317
 _parse_sub_cond	venv/lib/python2.7/sre_parse.py	/^def _parse_sub_cond(source, state, condgroup):$/;"	kind:function	line:376
@@ -2364,6 +2371,7 @@ _unknown	venv/lib/python2.7/encodings/__init__.py	/^_unknown = '--unknown--'$/;"
 _unknown	venv/local/lib/python2.7/encodings/__init__.py	/^_unknown = '--unknown--'$/;"	kind:variable	line:36
 _uvarprog	venv/lib/python2.7/posixpath.py	/^_uvarprog = None$/;"	kind:variable	line:281
 _uvarprog	venv/local/lib/python2.7/posixpath.py	/^_uvarprog = None$/;"	kind:variable	line:281
+_validate_cmd	command/cli.py	/^    def _validate_cmd(self, cmd):$/;"	kind:member	line:181
 _varprog	venv/lib/python2.7/posixpath.py	/^_varprog = None$/;"	kind:variable	line:280
 _varprog	venv/local/lib/python2.7/posixpath.py	/^_varprog = None$/;"	kind:variable	line:280
 _warnings_defaults	venv/lib/python2.7/warnings.py	/^    _warnings_defaults = True$/;"	kind:variable	line:398
@@ -3488,7 +3496,7 @@ dispatch_table	venv/local/lib/python2.7/copy_reg.py	/^dispatch_table = {}$/;"	ki
 distutils_path	venv/lib/python2.7/distutils/__init__.py	/^distutils_path = os.path.join(os.path.dirname(opcode.__file__), 'distutils')$/;"	kind:variable	line:11
 distutils_path	venv/local/lib/python2.7/distutils/__init__.py	/^distutils_path = os.path.join(os.path.dirname(opcode.__file__), 'distutils')$/;"	kind:variable	line:11
 dnsupdate.py	dnsupdate.py	1;"	kind:file	line:1
-doUpdate	command/cli.py	/^    def doUpdate(self, server, key, zone, do_ptr, cmd):$/;"	kind:member	line:295
+do_update	command/cli.py	/^    def do_update(self, server, zone, key, do_ptr, cmd):$/;"	kind:member	line:331
 dots	venv/lib/python2.7/encodings/idna.py	/^dots = re.compile(u"[\\u002E\\u3002\\uFF0E\\uFF61]")$/;"	kind:variable	line:7
 dots	venv/local/lib/python2.7/encodings/idna.py	/^dots = re.compile(u"[\\u002E\\u3002\\uFF0E\\uFF61]")$/;"	kind:variable	line:7
 dump	venv/lib/python2.7/sre_constants.py	/^    def dump(f, d, prefix):$/;"	kind:function	line:222
@@ -4189,7 +4197,6 @@ gb2312.py	venv/lib/python2.7/encodings/gb2312.py	1;"	kind:file	line:1
 gb2312.py	venv/local/lib/python2.7/encodings/gb2312.py	1;"	kind:file	line:1
 gbk.py	venv/lib/python2.7/encodings/gbk.py	1;"	kind:file	line:1
 gbk.py	venv/local/lib/python2.7/encodings/gbk.py	1;"	kind:file	line:1
-gen_PTR	command/cli.py	/^    def gen_PTR(self, address):$/;"	kind:member	line:259
 generate_generalized_integer	venv/lib/python2.7/encodings/punycode.py	/^def generate_generalized_integer(N, bias):$/;"	kind:function	line:80
 generate_generalized_integer	venv/local/lib/python2.7/encodings/punycode.py	/^def generate_generalized_integer(N, bias):$/;"	kind:function	line:80
 generate_integers	venv/lib/python2.7/encodings/punycode.py	/^def generate_integers(baselen, deltas):$/;"	kind:function	line:108
@@ -4206,7 +4213,8 @@ get	venv/local/lib/python2.7/UserDict.py	/^    def get(self, key, failobj=None):
 get	venv/local/lib/python2.7/_abcoll.py	/^    def get(self, key, default=None):$/;"	kind:member	line:379
 get	venv/local/lib/python2.7/os.py	/^            def get(self, key, failobj=None):$/;"	kind:member	line:446
 get	venv/local/lib/python2.7/sre_parse.py	/^    def get(self):$/;"	kind:member	line:212
-get_args	command/cli.py	/^    def get_args(self):$/;"	kind:member	line:59
+getKey	command/cli.py	/^    def getKey(self, fileName):$/;"	kind:member	line:277
+get_args	command/cli.py	/^    def get_args(self):$/;"	kind:member	line:60
 getatime	venv/lib/python2.7/genericpath.py	/^def getatime(filename):$/;"	kind:function	line:65
 getatime	venv/local/lib/python2.7/genericpath.py	/^def getatime(filename):$/;"	kind:function	line:65
 getctime	venv/lib/python2.7/genericpath.py	/^def getctime(filename):$/;"	kind:function	line:70
@@ -4539,11 +4547,6 @@ intersection	venv/lib/python2.7/_weakrefset.py	/^    def intersection(self, othe
 intersection	venv/local/lib/python2.7/_weakrefset.py	/^    def intersection(self, other):$/;"	kind:member	line:145
 intersection_update	venv/lib/python2.7/_weakrefset.py	/^    def intersection_update(self, other):$/;"	kind:member	line:149
 intersection_update	venv/local/lib/python2.7/_weakrefset.py	/^    def intersection_update(self, other):$/;"	kind:member	line:149
-is_valid_Name	command/cli.py	/^    def is_valid_Name(self, name):$/;"	kind:member	line:166
-is_valid_PTR	command/cli.py	/^    def is_valid_PTR(self, ptr):$/;"	kind:member	line:117
-is_valid_TTL	command/cli.py	/^    def is_valid_TTL(self, ttl):$/;"	kind:member	line:103
-is_valid_V4_Addr	command/cli.py	/^    def is_valid_V4_Addr(self, address):$/;"	kind:member	line:131
-is_valid_V6_Add	command/cli.py	/^    def is_valid_V6_Add(self, address):$/;"	kind:member	line:151
 isabs	venv/lib/python2.7/ntpath.py	/^def isabs(s):$/;"	kind:function	line:56
 isabs	venv/lib/python2.7/posixpath.py	/^def isabs(s):$/;"	kind:function	line:52
 isabs	venv/local/lib/python2.7/ntpath.py	/^def isabs(s):$/;"	kind:function	line:56
@@ -4796,7 +4799,6 @@ pardir	venv/local/lib/python2.7/ntpath.py	/^pardir = '..'$/;"	kind:variable	line
 pardir	venv/local/lib/python2.7/posixpath.py	/^pardir = '..'$/;"	kind:variable	line:31
 parse	venv/lib/python2.7/sre_parse.py	/^def parse(str, flags=0, pattern=None):$/;"	kind:function	line:706
 parse	venv/local/lib/python2.7/sre_parse.py	/^def parse(str, flags=0, pattern=None):$/;"	kind:function	line:706
-parse_Name	command/cli.py	/^    def parse_Name(self, zone, name):$/;"	kind:member	line:272
 parse_json	config/__init__.py	/^    def parse_json(self, config_file):$/;"	kind:member	line:27
 parse_template	venv/lib/python2.7/sre_parse.py	/^def parse_template(source, pattern):$/;"	kind:function	line:734
 parse_template	venv/local/lib/python2.7/sre_parse.py	/^def parse_template(source, pattern):$/;"	kind:function	line:734
@@ -5192,7 +5194,6 @@ uu_encode	venv/lib/python2.7/encodings/uu_codec.py	/^def uu_encode(input,errors=
 uu_encode	venv/local/lib/python2.7/encodings/uu_codec.py	/^def uu_encode(input,errors='strict',filename='<data>',mode=0666):$/;"	kind:function	line:15
 valid_opts	venv/bin/python-config	/^valid_opts = ['prefix', 'exec-prefix', 'includes', 'libs', 'cflags',$/;"	kind:variable	line:7
 valid_opts	venv/local/bin/python-config	/^valid_opts = ['prefix', 'exec-prefix', 'includes', 'libs', 'cflags',$/;"	kind:variable	line:7
-validate_input	command/cli.py	/^    def validate_input(self, cmd):$/;"	kind:member	line:179
 values	venv/lib/python2.7/UserDict.py	/^    def values(self): return self.data.values()$/;"	kind:member	line:61
 values	venv/lib/python2.7/UserDict.py	/^    def values(self):$/;"	kind:member	line:152
 values	venv/lib/python2.7/_abcoll.py	/^    def values(self):$/;"	kind:member	line:416
