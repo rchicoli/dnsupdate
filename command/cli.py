@@ -14,6 +14,11 @@ from dns.exception import SyntaxError
 
 from config import Config
 
+# Matt's DNS management tool with some improvements
+# Manage DNS using DDNS features
+#
+# See http://planetfoo.org/blog/archive/2012/01/24/a-better-nsupdate/
+
 class Cli(object):
     """
     usage: dnsupdate.py [-h] [-c CONFIG] [-o ZONE] [-x] [-v]
